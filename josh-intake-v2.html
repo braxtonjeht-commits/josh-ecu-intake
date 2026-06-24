@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ECU Service — Submit Your Order</title>
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1e1e1e;
+  --border: #2a2a2a;
+  --accent: #e85d04;
+  --accent-dim: rgba(232,93,4,0.1);
+  --text: #e8e8e8;
+  --muted: #666;
+  --green: #22c55e;
+  --red: #ef4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.logo {
+  width: 38px;
+  height: 38px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-weight: 900;
+  font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.header-text h1 { font-size: 0.95rem; font-weight: 600; }
+.header-text p { font-size: 0.7rem; color: var(--muted); font-family: monospace; letter-spacing: 0.05em; }
+
+/* PROGRESS */
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  position: sticky;
+  top: 70px;
+  z-index: 49;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+  width: 20%;
+}
+
+/* STEP DOTS */
+.step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg);
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.2s;
+}
+
+.step-dot.active { background: var(--accent); transform: scale(1.3); }
+.step-dot.done { background: var(--green); }
+
+/* MAIN */
+main { max-width: 600px; margin: 0 auto; padding: 0 16px 100px; }
+
+/* SECTION */
+.section { display: none; }
+.section.active { display: block; }
+
+.section-head {
+  margin-bottom: 24px;
+  padding-top: 8px;
+}
+
+.section-tag {
+  font-family: monospace;
+  font-size: 0.68rem;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.section-title { font-size: 1.3rem; font-weight: 700; }
+.section-sub { font-size: 0.83rem; color: var(--muted); margin-top: 3px; }
+
+/* FIELDS */
+.field { margin-bottom: 16px; }
+
+.field label {
+  display: block;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 5px;
+}
+
+.field label .req { color: var(--accent); margin-left: 2px; }
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-family: inherit;
+  padding: 11px 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus { border-color: var(--accent); }
+
+.field textarea { resize: vertical; min-height: 85px; }
+
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* SERVICE CARDS */
+.service-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.service-card {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.service-card input { display: none; }
+.service-card:hover { border-color: var(--accent); background: var(--accent-dim); }
+.service-card.selected { border-color: var(--accent); background: var(--accent-dim); }
+.service-card .s-title { font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
+.service-card .s-desc { font-size: 0.75rem; color: var(--muted); }
+
+/* PHOTO UPLOAD */
+.photo-zone {
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
+}
+
+.photo-zone:hover { border-color: var(--accent); background: var(--accent-dim); }
+.photo-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.photo-zone .icon { font-size: 1.8rem; margin-bottom: 6px; }
+.photo-zone p { font-size: 0.82rem; color: var(--muted); }
+.photo-zone .hint { font-size: 0.7rem; color: var(--muted); margin-top: 3px; font-family: monospace; }
+
+.photo-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.photo-thumb { width: 72px; height: 72px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); }
+
+/* TERMS SECTION */
+.tos-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-bottom: 16px;
+  scrollbar-width: thin;
+}
+
+.tos-box h3 { color: var(--text); font-size: 0.85rem; margin-bottom: 8px; font-family: monospace; letter-spacing: 0.06em; }
+.tos-box h4 { color: var(--text); font-size: 0.78rem; margin: 10px 0 4px; }
+
+.check-field {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 13px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.check-field:hover { border-color: var(--accent); }
+.check-field.checked { border-color: var(--green); background: rgba(34,197,94,0.06); }
+
+.check-field input { display: none; }
+
+.check-box {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: all 0.15s;
+  font-size: 12px;
+}
+
+.check-field.checked .check-box {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.check-text { font-size: 0.83rem; line-height: 1.5; }
+.check-text strong { color: var(--accent); }
+
+/* SHIPPING RULES */
+.shipping-rules {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.shipping-rules h3 {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.rule { display: flex; gap: 10px; margin-bottom: 7px; font-size: 0.82rem; align-items: flex-start; }
+.rule-ok { color: var(--green); flex-shrink: 0; }
+.rule-no { color: var(--red); flex-shrink: 0; }
+
+/* INFO BOX */
+.info-box {
+  background: var(--accent-dim);
+  border: 1px solid rgba(232,93,4,0.25);
+  border-radius: 8px;
+  padding: 13px 15px;
+  font-size: 0.82rem;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.info-box strong {
+  display: block;
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* BUTTONS */
+.btn-row { display: flex; gap: 10px; margin-top: 28px; }
+
+.btn {
+  padding: 13px 24px;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btn-primary { background: var(--accent); color: #fff; flex: 1; }
+.btn-primary:hover { background: #c94d02; }
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover { border-color: var(--accent); }
+
+/* SUCCESS */
+.success { display: none; text-align: center; padding: 40px 16px; }
+.success.active { display: block; }
+
+.success-icon {
+  width: 68px;
+  height: 68px;
+  background: rgba(34,197,94,0.1);
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 18px;
+}
+
+.order-id-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 300px;
+}
+
+.order-id-card .oid-label {
+  font-family: monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.order-id-card .oid-val {
+  font-family: monospace;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.order-id-card .oid-sub { font-size: 0.75rem; color: var(--muted); margin-top: 5px; }
+
+.next-steps {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  text-align: left;
+  margin-top: 16px;
+}
+
+.next-steps h3 {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.next-step { display: flex; gap: 12px; margin-bottom: 12px; font-size: 0.83rem; }
+
+.ns-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.label-notice {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 8px;
+  padding: 13px 15px;
+  font-size: 0.82rem;
+  margin-top: 14px;
+  color: var(--green);
+  line-height: 1.6;
+}
+
+.label-notice strong { display: block; margin-bottom: 3px; font-size: 0.75rem; font-family: monospace; letter-spacing: 0.06em; }
+
+@media (max-width: 420px) {
+  .row2 { grid-template-columns: 1fr; }
+  .row3 { grid-template-columns: 1fr 1fr; }
+  .service-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">ECU</div>
+  <div class="header-text">
+    <h1>ECU Service Intake</h1>
+    <p>SUBMIT YOUR ORDER · TRACK IN REAL TIME</p>
+  </div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<div class="step-dots">
+  <div class="step-dot active" id="dot-1"></div>
+  <div class="step-dot" id="dot-2"></div>
+  <div class="step-dot" id="dot-3"></div>
+  <div class="step-dot" id="dot-4"></div>
+  <div class="step-dot" id="dot-5"></div>
+</div>
+
+<main>
+
+  <!-- SECTION 1: CUSTOMER -->
+  <div class="section active" id="s1">
+    <div class="section-head">
+      <div class="section-tag">Step 1 of 5</div>
+      <div class="section-title">Your Information</div>
+      <div class="section-sub">We'll send order updates and your shipping label here.</div>
+    </div>
+
+    <div class="field">
+      <label>Full Name <span class="req">*</span></label>
+      <input type="text" id="f-name" placeholder="John Smith">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="f-email" placeholder="you@email.com">
+      </div>
+      <div class="field">
+        <label>Phone <span class="req">*</span></label>
+        <input type="tel" id="f-phone" placeholder="(555) 000-0000">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>How did you hear about us?</label>
+      <select id="f-ref">
+        <option value="">Select one</option>
+        <option>Google Search</option>
+        <option>Facebook / Instagram</option>
+        <option>Friend / Word of mouth</option>
+        <option>Forum / Reddit</option>
+        <option>Returning customer</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="next(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: VEHICLE -->
+  <div class="section" id="s2">
+    <div class="section-head">
+      <div class="section-tag">Step 2 of 5</div>
+      <div class="section-title">Vehicle Information</div>
+      <div class="section-sub">Tell us about the car the ECU came from.</div>
+    </div>
+
+    <div class="row3">
+      <div class="field">
+        <label>Year <span class="req">*</span></label>
+        <input type="number" id="f-year" placeholder="2003" min="1980" max="2030">
+      </div>
+      <div class="field" style="grid-column: span 2">
+        <label>Make <span class="req">*</span></label>
+        <input type="text" id="f-make" placeholder="Nissan">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Model <span class="req">*</span></label>
+        <input type="text" id="f-model" placeholder="350Z">
+      </div>
+      <div class="field">
+        <label>Trim / Engine</label>
+        <input type="text" id="f-trim" placeholder="Track / VQ35DE">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Modifications</label>
+      <textarea id="f-mods" placeholder="List any engine, fuel, boost, or tune mods that may affect the service..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="prev(2)">← Back</button>
+      <button class="btn btn-primary" onclick="next(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: ECU + SERVICE -->
+  <div class="section" id="s3">
+    <div class="section-head">
+      <div class="section-tag">Step 3 of 5</div>
+      <div class="section-title">ECU & Service Details</div>
+      <div class="section-sub">Tell us what you need and what you're sending.</div>
+    </div>
+
+    <div class="field">
+      <label>ECU Part Number <span class="req">*</span></label>
+      <input type="text" id="f-ecu" placeholder="e.g. MEC37-410 or Bosch 0261S08052">
+    </div>
+
+    <div class="field">
+      <label>Service Needed <span class="req">*</span></label>
+      <div class="service-grid" id="service-grid">
+        <label class="service-card" onclick="selectService(this, 'Custom Tune')">
+          <input type="radio" name="svc" value="Custom Tune">
+          <div class="s-title">Custom Tune</div>
+          <div class="s-desc">Performance or flex fuel tune</div>
+        </label>
+        <label class="service-card" onclick="selectService(this, 'ECU Repair')">
+          <input type="radio" name="svc" value="ECU Repair">
+          <div class="s-title">ECU Repair</div>
+          <div class="s-desc">Diagnose and fix a faulty ECU</div>
+        </label>
+        <label class="service-card" onclick="selectService(this, 'ECU Clone')">
+          <input type="radio" name="svc" value="ECU Clone">
+          <div class="s-title">ECU Clone</div>
+          <div class="s-desc">Copy one ECU to a replacement</div>
+        </label>
+        <label class="service-card" onclick="selectService(this, 'Read / Backup')">
+          <input type="radio" name="svc" value="Read / Backup">
+          <div class="s-title">Read / Backup</div>
+          <div class="s-desc">Save your ECU's current map</div>
+        </label>
+        <label class="service-card" onclick="selectService(this, 'Other')">
+          <input type="radio" name="svc" value="Other">
+          <div class="s-title">Other</div>
+          <div class="s-desc">Describe below</div>
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Describe the issue or what you want <span class="req">*</span></label>
+      <textarea id="f-desc" placeholder="Be specific — include error codes, symptoms, goals, fuel type, power targets..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Photos of your ECU before shipping</label>
+      <div class="photo-zone">
+        <input type="file" accept="image/*" multiple onchange="previewPhotos(this)">
+        <div class="icon">📷</div>
+        <p>Tap to add photos</p>
+        <div class="hint">TOP · BOTTOM · CONNECTOR SIDE</div>
+      </div>
+      <div class="photo-previews" id="photo-previews"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="prev(3)">← Back</button>
+      <button class="btn btn-primary" onclick="next(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: TERMS -->
+  <div class="section" id="s4">
+    <div class="section-head">
+      <div class="section-tag">Step 4 of 5</div>
+      <div class="section-title">Terms & Agreements</div>
+      <div class="section-sub">Please read and agree to all terms before continuing.</div>
+    </div>
+
+    <div class="tos-box">
+      <h3>ECU SHOP — TERMS OF SERVICE v1.0</h3>
+
+      <h4>1. RETURN SHIPPING FEE</h4>
+      <p>If you submit an ECU for service and choose <strong style="color:#ef4444">not to proceed</strong> after your ECU has been received at our shop, a <strong style="color:#ef4444">return shipping fee will be charged</strong> before your ECU is returned to you. The fee reflects the actual cost of return shipping and will be communicated at that time. Your ECU will not be returned until the fee is paid.</p>
+
+      <h4>2. SERVICE ELIGIBILITY</h4>
+      <p>ECUs damaged in transit due to improper packing are not eligible for service and will be returned at the customer's expense. We document the condition of your ECU upon arrival with photos.</p>
+
+      <h4>3. PACKING REQUIREMENTS</h4>
+      <p>You are responsible for properly packing your ECU per the instructions provided. We are not responsible for damage caused by insufficient packing materials or methods.</p>
+
+      <h4>4. TURNAROUND TIME</h4>
+      <p>Turnaround times are estimates and may vary based on parts availability and shop workload. You will be notified of any significant delays.</p>
+
+      <h4>5. PAYMENT</h4>
+      <p>Payment is due upon completion of service before the ECU is returned. Accepted payment methods will be communicated at time of completion.</p>
+
+      <h4>6. LIMITATION OF LIABILITY</h4>
+      <p>We are not liable for any pre-existing conditions or damage not caused by our service. All ECUs are photographed upon arrival to document their condition.</p>
+    </div>
+
+    <label class="check-field" id="cf-terms" onclick="toggleCheck('cf-terms', 'cb-terms')">
+      <input type="checkbox" id="cb-terms">
+      <div class="check-box" id="cbox-terms"></div>
+      <div class="check-text">I have read and agree to the <strong>Terms of Service v1.0</strong></div>
+    </label>
+
+    <label class="check-field" id="cf-fee" onclick="toggleCheck('cf-fee', 'cb-fee')">
+      <input type="checkbox" id="cb-fee">
+      <div class="check-box" id="cbox-fee"></div>
+      <div class="check-text">I understand that if I choose <strong>not to proceed with service</strong> after my ECU is received, I will be charged a <strong>return shipping fee</strong> before my ECU is returned</div>
+    </label>
+
+    <label class="check-field" id="cf-pack" onclick="toggleCheck('cf-pack', 'cb-pack')">
+      <input type="checkbox" id="cb-pack">
+      <div class="check-box" id="cbox-pack"></div>
+      <div class="check-text">I will pack my ECU correctly per the requirements. I understand that <strong>improperly packed ECUs are not eligible for service</strong></div>
+    </label>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="prev(4)">← Back</button>
+      <button class="btn btn-primary" onclick="next(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: SHIPPING ADDRESS -->
+  <div class="section" id="s5">
+    <div class="section-head">
+      <div class="section-tag">Step 5 of 5</div>
+      <div class="section-title">Shipping Address</div>
+      <div class="section-sub">Where should we send your ECU back when complete?</div>
+    </div>
+
+    <div class="shipping-rules">
+      <h3>⚠ Packing Requirements</h3>
+      <div class="rule"><span class="rule-ok">✓</span><span>Bubble wrap — at least 2 full layers around the ECU</span></div>
+      <div class="rule"><span class="rule-ok">✓</span><span>Rigid cardboard box with padding on all 6 sides</span></div>
+      <div class="rule"><span class="rule-ok">✓</span><span>Print and include a copy of your order confirmation inside</span></div>
+      <div class="rule"><span class="rule-ok">✓</span><span>Secure all connectors — bag or tape any loose pins</span></div>
+      <div class="rule"><span class="rule-no">✗</span><span>Do NOT ship in a padded mailer or envelope</span></div>
+      <div class="rule"><span class="rule-no">✗</span><span>Do NOT send without the pre-paid shipping label we email you</span></div>
+    </div>
+
+    <div class="field">
+      <label>Street Address <span class="req">*</span></label>
+      <input type="text" id="f-addr1" placeholder="123 Main Street">
+    </div>
+
+    <div class="field">
+      <label>Apt / Suite (optional)</label>
+      <input type="text" id="f-addr2" placeholder="Unit 4B">
+    </div>
+
+    <div class="row3">
+      <div class="field" style="grid-column: span 2">
+        <label>City <span class="req">*</span></label>
+        <input type="text" id="f-city" placeholder="Temple">
+      </div>
+      <div class="field">
+        <label>State <span class="req">*</span></label>
+        <input type="text" id="f-state" placeholder="TX">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ZIP Code <span class="req">*</span></label>
+      <input type="text" id="f-zip" placeholder="76501">
+    </div>
+
+    <div class="info-box">
+      <strong>What happens next</strong>
+      After submitting you'll get a confirmation email with your order ID. Your pre-paid shipping label will be emailed within 24 hours. Print it, pack your ECU per the requirements above, and drop off at any UPS location.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="prev(5)">← Back</button>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitOrder()">Submit Order →</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success" id="success">
+    <div class="success-icon">✓</div>
+    <h2 style="font-size:1.4rem;margin-bottom:6px">Order Submitted!</h2>
+    <p style="color:var(--muted);font-size:0.88rem">Check your email for confirmation.</p>
+
+    <div class="order-id-card">
+      <div class="oid-label">Your Order ID</div>
+      <div class="oid-val" id="oid-display">ECU-0000</div>
+      <div class="oid-sub">Screenshot this for your records</div>
+    </div>
+
+    <div class="label-notice">
+      <strong>📦 Shipping Label</strong>
+      Your pre-paid shipping label will be emailed to you within 24 hours. Do not ship your ECU until you receive it.
+    </div>
+
+    <div class="next-steps">
+      <h3>What Happens Next</h3>
+      <div class="next-step">
+        <div class="ns-dot">1</div>
+        <div>Check your email — confirmation is on its way</div>
+      </div>
+      <div class="next-step">
+        <div class="ns-dot">2</div>
+        <div>Wait for your shipping label email (within 24 hours)</div>
+      </div>
+      <div class="next-step">
+        <div class="ns-dot">3</div>
+        <div>Pack your ECU per the requirements and attach the label</div>
+      </div>
+      <div class="next-step">
+        <div class="ns-dot">4</div>
+        <div>Drop off at any UPS location</div>
+      </div>
+      <div class="next-step">
+        <div class="ns-dot">5</div>
+        <div>We'll text and email you at every step once it arrives</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ============================================
+// CONFIG
+// ============================================
+const N8N_WEBHOOK = 'https://n8n.braxtonjeht.com/webhook/ecu-intake';
+
+let currentStep = 1;
+let selectedService = '';
+
+const STEPS = 5;
+const PROGRESS = { 1: '20%', 2: '40%', 3: '60%', 4: '80%', 5: '100%' };
+
+// ============================================
+// NAVIGATION
+// ============================================
+function next(from) {
+  if (!validate(from)) return;
+  document.getElementById(`s${from}`).classList.remove('active');
+  document.getElementById(`dot-${from}`).classList.remove('active');
+  document.getElementById(`dot-${from}`).classList.add('done');
+  currentStep = from + 1;
+  document.getElementById(`s${currentStep}`).classList.add('active');
+  document.getElementById(`dot-${currentStep}`).classList.add('active');
+  document.getElementById('progress').style.width = PROGRESS[currentStep];
+  window.scrollTo(0, 0);
+}
+
+function prev(from) {
+  document.getElementById(`s${from}`).classList.remove('active');
+  document.getElementById(`dot-${from}`).classList.remove('active');
+  currentStep = from - 1;
+  document.getElementById(`s${currentStep}`).classList.add('active');
+  document.getElementById(`dot-${currentStep}`).classList.remove('done');
+  document.getElementById(`dot-${currentStep}`).classList.add('active');
+  document.getElementById('progress').style.width = PROGRESS[currentStep];
+  window.scrollTo(0, 0);
+}
+
+// ============================================
+// VALIDATION
+// ============================================
+function validate(step) {
+  if (step === 1) {
+    if (!v('f-name') || !v('f-email') || !v('f-phone')) {
+      alert('Please fill in your name, email, and phone number.');
+      return false;
+    }
+    if (!document.getElementById('f-email').value.includes('@')) {
+      alert('Please enter a valid email address.');
+      return false;
+    }
+  }
+  if (step === 2) {
+    if (!v('f-year') || !v('f-make') || !v('f-model')) {
+      alert('Please fill in the vehicle year, make, and model.');
+      return false;
+    }
+  }
+  if (step === 3) {
+    if (!v('f-ecu') || !v('f-desc') || !selectedService) {
+      alert('Please fill in the ECU part number, select a service type, and describe what you need.');
+      return false;
+    }
+  }
+  if (step === 4) {
+    const terms = document.getElementById('cb-terms').checked;
+    const fee   = document.getElementById('cb-fee').checked;
+    const pack  = document.getElementById('cb-pack').checked;
+    if (!terms || !fee || !pack) {
+      alert('Please agree to all three terms before continuing.');
+      return false;
+    }
+  }
+  return true;
+}
+
+function v(id) {
+  return document.getElementById(id).value.trim() !== '';
+}
+
+// ============================================
+// SERVICE SELECT
+// ============================================
+function selectService(el, val) {
+  document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedService = val;
+}
+
+// ============================================
+// CHECKBOX TOGGLE
+// ============================================
+function toggleCheck(fieldId, cbId) {
+  const cb = document.getElementById(cbId);
+  cb.checked = !cb.checked;
+  const field = document.getElementById(fieldId);
+  const box = field.querySelector('.check-box');
+  if (cb.checked) {
+    field.classList.add('checked');
+    box.textContent = '✓';
+  } else {
+    field.classList.remove('checked');
+    box.textContent = '';
+  }
+}
+
+// ============================================
+// PHOTO PREVIEW
+// ============================================
+function previewPhotos(input) {
+  const container = document.getElementById('photo-previews');
+  container.innerHTML = '';
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'photo-thumb';
+      container.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ============================================
+// GENERATE ORDER ID
+// ============================================
+function generateOrderId() {
+  const ts = Date.now().toString().slice(-4);
+  const rand = Math.floor(10 + Math.random() * 90);
+  return `ECU-${ts}${rand}`;
+}
+
+// ============================================
+// SUBMIT
+// ============================================
+async function submitOrder() {
+  if (!v('f-addr1') || !v('f-city') || !v('f-state') || !v('f-zip')) {
+    alert('Please fill in your complete shipping address.');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  const addr2 = document.getElementById('f-addr2').value.trim();
+  const address = `${document.getElementById('f-addr1').value.trim()}${addr2 ? ', ' + addr2 : ''}, ${document.getElementById('f-city').value.trim()}, ${document.getElementById('f-state').value.trim()} ${document.getElementById('f-zip').value.trim()}`;
+
+  const orderId = generateOrderId();
+
+  const payload = {
+    orderId,
+    name:                   document.getElementById('f-name').value.trim(),
+    email:                  document.getElementById('f-email').value.trim(),
+    phone:                  document.getElementById('f-phone').value.trim(),
+    referral:               document.getElementById('f-ref').value,
+    year:                   document.getElementById('f-year').value,
+    make:                   document.getElementById('f-make').value.trim(),
+    model:                  document.getElementById('f-model').value.trim(),
+    trim:                   document.getElementById('f-trim').value.trim(),
+    mods:                   document.getElementById('f-mods').value.trim(),
+    ecuPart:                document.getElementById('f-ecu').value.trim(),
+    service:                selectedService,
+    description:            document.getElementById('f-desc').value.trim(),
+    address,
+    termsAgreed:            true,
+    returnFeeAcknowledged:  true,
+    packingConfirmed:       true,
+    termsVersion:           'v1.0',
+    submittedAt:            new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('Webhook failed');
+
+    document.getElementById('oid-display').textContent = orderId;
+    document.getElementById(`s5`).classList.remove('active');
+    document.getElementById('success').classList.add('active');
+    document.getElementById('progress').style.width = '100%';
+    window.scrollTo(0, 0);
+
+  } catch(e) {
+    btn.textContent = 'Submit Order →';
+    btn.disabled = false;
+    alert('There was a problem submitting your order. Please try again.');
+  }
+}
+</script>
+</body>
+</html>
