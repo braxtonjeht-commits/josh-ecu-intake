@@ -893,9 +893,8 @@ function previewPhotos(input) {
 // GENERATE ORDER ID
 // ============================================
 function generateOrderId() {
-  const ts = Date.now().toString().slice(-4);
-  const rand = Math.floor(10 + Math.random() * 90);
-  return `ECU-${ts}${rand}`;
+  // full timestamp ensures uniqueness — no collision risk
+  return `ECU-${Date.now()}`;
 }
 
 // ============================================
